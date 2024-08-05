@@ -1,12 +1,10 @@
 import compression from 'compression'
-import session from 'cookie-session'
 import express from 'express'
 import fs from 'fs'
 import helmet from 'helmet'
 import sslRedirect from 'heroku-ssl-redirect'
 import path from 'path'
 // import { api } from './api'
-import { handleFbRequest } from './fb'
 
 async function startup() {
   const app = express()
@@ -37,23 +35,35 @@ async function startup() {
     let result: { success: boolean, error: string } = { success: false, error: '' };
     let key = req.query['key'] as string;
 
-    if (key === process.env['FB_API_KEY']!) {
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
 
-      const message = req.body
-      const json = JSON.stringify(message)
+    console.log('key', key)
+    console.log('mode', mode)
+    console.log('token', token)
+    console.log('challenge', challenge)
+    console.log('query', JSON.stringify(req.query ?? ''))
+    console.log('body', JSON.stringify(req.body ?? ''))
 
-      const logAllMessage = process.env['LOG_ALL_MESSAGE']!
-      if (logAllMessage) {
-        console.log('body', message)
-        console.log('json', json)
-      }
+    // if (key === process.env['FB_API_KEY']!) {
 
-      result = await handleFbRequest(message)
-    }
-    else {
-      result.error = 'fb.webhook.action.NOT_ALLOWED'
-    }
-    res.send('dukim');
+    //   const message = req.body
+    //   const json = JSON.stringify(message)
+
+    //   const logAllMessage = process.env['LOG_ALL_MESSAGE']!
+    //   if (logAllMessage) {
+    //     console.log('body', message)
+    //     console.log('json', json)
+    //   }
+
+    //   result = await handleFbRequest(message)
+    // }
+    // else {
+    //   result.error = 'fb.webhook.action.NOT_ALLOWED'
+    // }
+    // res.send(challenge);
+    res.status(200).send(challenge);
   })
 
   app.use('/*', async (req, res) => {
