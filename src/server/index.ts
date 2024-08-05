@@ -69,19 +69,35 @@ async function startup() {
   // Endpoint to handle webhook events
   app.post('/api/fb/webhook', async (req, res) => {
     const body = req.body;
-    console.log('post.fb.body', JSON.stringify(body))
+    console.log('fb.post.query', JSON.stringify(req.query ?? ''))
+    console.log('fb.post.body', JSON.stringify(req.body ?? ''))
 
-    if (body.object === 'page') {
-      body.entry.forEach(function (entry: any) {
-        const webhook_event = entry.messaging[0];
-        console.log(webhook_event);
-        // Handle the event here
+    if (body.object === 'group') {
+      body.entry.forEach((entry: any) => {
+        const changes = entry.changes;
+        changes.forEach((change: any) => {
+          if (change.field === 'feed') {
+            console.log('New post:', change.value);
+            // Handle the new post here
+          }
+        });
       });
-
       res.status(200).send('EVENT_RECEIVED');
     } else {
       res.sendStatus(404);
     }
+
+    // if (body.object === 'page') {
+    //   body.entry.forEach(function (entry: any) {
+    //     const webhook_event = entry.messaging[0];
+    //     console.log(webhook_event);
+    //     // Handle the event here
+    //   });
+
+    //   res.status(200).send('EVENT_RECEIVED');
+    // } else {
+    //   res.sendStatus(404);
+    // }
   });
 
 
